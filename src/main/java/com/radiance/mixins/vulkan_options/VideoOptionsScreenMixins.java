@@ -260,6 +260,38 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
         this.body.addSingleOptionEntry(cloudOpacity);
         this.body.addSingleOptionEntry(cloudAnisotropy);
 
+        // ── Sun category ──
+        SimpleOption<Integer> sunSize = new SimpleOption<>(
+            Options.SUN_SIZE_KEY,
+            SimpleOption.emptyTooltip(),
+            (optionText, value) -> getGenericValueText(optionText,
+                Text.literal(value + "%")),
+            new SimpleOption.ValidatingIntSliderCallbacks(1, 100),
+            Codec.intRange(1, 100),
+            Options.sunSize,
+            value -> {
+                Options.sunSize = value;
+                Options.overwriteConfig();
+            });
+
+        SimpleOption<Integer> sunPathTilt = new SimpleOption<>(
+            Options.SUN_PATH_TILT_KEY,
+            SimpleOption.emptyTooltip(),
+            (optionText, value) -> getGenericValueText(optionText,
+                Text.literal(value + "°")),
+            new SimpleOption.ValidatingIntSliderCallbacks(0, 45),
+            Codec.intRange(0, 45),
+            Options.sunPathTilt,
+            value -> {
+                Options.sunPathTilt = value;
+                Options.overwriteConfig();
+            });
+
+        this.body.addEntry(
+            new CategoryVideoOptionEntry(Text.translatable(Options.CATEGORY_SUN), body));
+        this.body.addSingleOptionEntry(sunSize);
+        this.body.addSingleOptionEntry(sunPathTilt);
+
         ci.cancel();
     }
 }

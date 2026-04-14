@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.radiance.client.UnsafeManager;
 import com.radiance.client.proxy.vulkan.BufferProxy;
+import com.radiance.client.option.Options;
 import com.radiance.client.proxy.world.ChunkProxy;
 import com.radiance.client.proxy.world.EntityProxy;
 import com.radiance.client.proxy.world.PlayerProxy;
@@ -270,6 +271,7 @@ public abstract class WorldRendererMixins {
         MatrixStack matrixStack = new MatrixStack();
         matrixStack.push();
         matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0F));
+        matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float) Options.sunPathTilt));
         matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(skyAngle * 360.0F));
         Matrix4f rotationMatrix = matrixStack.peek().getPositionMatrix();
         Vector3f sunDirection = rotationMatrix.transformPosition(0, 1, 0, new Vector3f())

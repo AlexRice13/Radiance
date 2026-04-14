@@ -44,6 +44,10 @@ public class Options {
     public static final String CLOUD_OPACITY_KEY = "options.video.cloud_opacity";
     public static final String CLOUD_ANISOTROPY_KEY = "options.video.cloud_anisotropy";
 
+    public static final String CATEGORY_SUN = "options.video.category.sun";
+    public static final String SUN_SIZE_KEY = "options.video.sun_size";
+    public static final String SUN_PATH_TILT_KEY = "options.video.sun_path_tilt";
+
     public static final String UPSCALER_TYPE_NATIVE = "options.video.upscaler_type.native";
     public static final String UPSCALER_TYPE_FSR3 = "options.video.upscaler_type.fsr3";
 
@@ -68,6 +72,8 @@ public class Options {
     public static int cloudDensityGradient = 10;   // 0-100 → 0.0-1.0
     public static int cloudOpacity = 80;            // 0-100 → 0.0-1.0
     public static int cloudAnisotropy = 80;         // 0-100 → 0.0-1.0
+    public static int sunSize = 30;                 // 1-100 → 0.001-0.100 radians
+    public static int sunPathTilt = 23;             // 0-45 degrees
 
     public static void readOptions() {
         Path path = RadianceClient.radianceDir.resolve(OPTION_PROPERTIES);
@@ -99,6 +105,10 @@ public class Options {
                 props.getProperty("cloudOpacity", String.valueOf(cloudOpacity)));
             cloudAnisotropy = Integer.parseInt(
                 props.getProperty("cloudAnisotropy", String.valueOf(cloudAnisotropy)));
+            sunSize = Integer.parseInt(
+                props.getProperty("sunSize", String.valueOf(sunSize)));
+            sunPathTilt = Integer.parseInt(
+                props.getProperty("sunPathTilt", String.valueOf(sunPathTilt)));
 
             overwriteConfig();
 //            System.out.println("Successfully read options: " + path);
@@ -123,6 +133,8 @@ public class Options {
         props.setProperty("cloudDensityGradient", String.valueOf(cloudDensityGradient));
         props.setProperty("cloudOpacity", String.valueOf(cloudOpacity));
         props.setProperty("cloudAnisotropy", String.valueOf(cloudAnisotropy));
+        props.setProperty("sunSize", String.valueOf(sunSize));
+        props.setProperty("sunPathTilt", String.valueOf(sunPathTilt));
 
         try {
             Files.createDirectories(path.getParent());

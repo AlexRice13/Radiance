@@ -285,7 +285,7 @@ public class BufferProxy {
         boolean skyDark, boolean hasBlindnessOrDarkness, int submersionType, int moonPhase,
         float rainGradient, int sunTextureID, int moonTextureID) {
         try (MemoryStack stack = stackPush()) {
-            int size = 160;
+            int size = 176;
             ByteBuffer bb = stack.malloc(size);
             long addr = memAddress(bb);
             int baseAddr = 0;
@@ -345,6 +345,15 @@ public class BufferProxy {
             baseAddr += Float.BYTES * 3; // moonRadiance
             bb.putInt(baseAddr, moonTextureID);
             baseAddr += Integer.BYTES; // moonTextureID
+
+            bb.putFloat(baseAddr, Options.sunSize * 0.001f); // sunAngularRadius in radians
+            baseAddr += Float.BYTES;
+            bb.putFloat(baseAddr, 0.0f); // pad3
+            baseAddr += Float.BYTES;
+            bb.putFloat(baseAddr, 0.0f); // pad4
+            baseAddr += Float.BYTES;
+            bb.putFloat(baseAddr, 0.0f); // pad5
+            baseAddr += Float.BYTES;
 
             updateSkyUniform(addr);
         }
