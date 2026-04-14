@@ -37,6 +37,7 @@
   "options.video.hdr_min_luminance": "HDR Min Luminance",
   "options.video.hdr_max_luminance": "HDR Max Luminance",
   "options.video.hdr_gamma": "HDR Gamma",
+  "options.video.sdr_brightness": "SDR Content Brightness",
   "options.video.category.clouds": "Clouds",
   "options.video.cloud_density_gradient": "Cloud Density Gradient",
   "options.video.cloud_opacity": "Cloud Opacity",

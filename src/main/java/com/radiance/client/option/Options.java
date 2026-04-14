@@ -43,6 +43,7 @@ public class Options {
     public static final String HDR_MIN_LUMINANCE_KEY = "options.video.hdr_min_luminance";
     public static final String HDR_MAX_LUMINANCE_KEY = "options.video.hdr_max_luminance";
     public static final String HDR_GAMMA_KEY = "options.video.hdr_gamma";
+    public static final String SDR_BRIGHTNESS_KEY = "options.video.sdr_brightness";
 
     public static final String CATEGORY_CLOUDS = "options.video.category.clouds";
     public static final String CLOUD_DENSITY_GRADIENT_KEY = "options.video.cloud_density_gradient";
@@ -71,6 +72,7 @@ public class Options {
     public static float hdrMinLuminance = 5.0f;
     public static float hdrMaxLuminance = 1000.0f;
     public static float hdrGamma = 1.0f;
+    public static float sdrBrightness = 200.0f;
     public static int dlssMode = 1;
     public static int upscalerType = 1;
     public static int upscalerQuality = 1;
@@ -112,6 +114,9 @@ public class Options {
                 false);
             setHdrGamma(Float.parseFloat(props.getProperty("hdrGamma", String.valueOf(hdrGamma))),
                 false);
+            setSdrBrightness(Float.parseFloat(props.getProperty("sdrBrightness",
+                    String.valueOf(sdrBrightness))),
+                false);
             setChunkBuildingBatchSize(Integer.parseInt(props.getProperty("chunkBuildingBatchSize",
                     String.valueOf(chunkBuildingBatchSize))),
                 false);
@@ -146,6 +151,7 @@ public class Options {
         props.setProperty("hdrMinLuminance", String.valueOf(hdrMinLuminance));
         props.setProperty("hdrMaxLuminance", String.valueOf(hdrMaxLuminance));
         props.setProperty("hdrGamma", String.valueOf(hdrGamma));
+        props.setProperty("sdrBrightness", String.valueOf(sdrBrightness));
         props.setProperty("dlssMode", String.valueOf(dlssMode));
         props.setProperty("upscalerType", String.valueOf(upscalerType));
         props.setProperty("upscalerQuality", String.valueOf(upscalerQuality));
@@ -238,6 +244,16 @@ public class Options {
     public static void setHdrGamma(float hdrGamma, boolean write) {
         Options.hdrGamma = Math.max(hdrGamma, 0.001f);
         nativeSetHdrGamma(Options.hdrGamma, write);
+        if (write) {
+            overwriteConfig();
+        }
+    }
+
+    public native static void nativeSetSdrBrightness(float sdrBrightness, boolean write);
+
+    public static void setSdrBrightness(float sdrBrightness, boolean write) {
+        Options.sdrBrightness = Math.max(sdrBrightness, 1.0f);
+        nativeSetSdrBrightness(Options.sdrBrightness, write);
         if (write) {
             overwriteConfig();
         }

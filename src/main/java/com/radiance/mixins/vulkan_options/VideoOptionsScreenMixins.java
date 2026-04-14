@@ -169,6 +169,15 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
             Math.round(Options.hdrGamma * 100.0f),
             value -> Options.setHdrGamma(value / 100.0f, true));
 
+        SimpleOption<Integer> sdrBrightness = new SimpleOption<>(Options.SDR_BRIGHTNESS_KEY,
+            SimpleOption.emptyTooltip(),
+            (optionText, value) -> getGenericValueText(optionText,
+                Text.literal(value + " nits")),
+            new SimpleOption.ValidatingIntSliderCallbacks(80, 500),
+            Codec.intRange(80, 500),
+            Math.round(Options.sdrBrightness),
+            value -> Options.setSdrBrightness(value, true));
+
         SimpleOption<Integer>
             chunkBuildingBatchSize =
             new SimpleOption<>(Options.CHUNK_BUILDING_BATCH_SIZE_KEY,
@@ -247,6 +256,7 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
         this.body.addSingleOptionEntry(hdrMinLuminance);
         this.body.addSingleOptionEntry(hdrMaxLuminance);
         this.body.addSingleOptionEntry(hdrGamma);
+        this.body.addSingleOptionEntry(sdrBrightness);
 
         this.body.addEntry(
             new CategoryVideoOptionEntry(Text.translatable(Options.CATEGORY_TERRAIN), body));
