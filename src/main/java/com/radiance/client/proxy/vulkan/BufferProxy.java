@@ -8,6 +8,7 @@ import static org.lwjgl.system.MemoryUtil.memSet;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.radiance.client.constant.Constants;
+import com.radiance.client.option.Options;
 import com.radiance.client.texture.TextureTracker;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -327,9 +328,12 @@ public class BufferProxy {
 
             bb.putFloat(baseAddr, rainGradient);
             baseAddr += Float.BYTES;
+            bb.putFloat(baseAddr, Options.cloudDensityGradient / 100.0f);
             baseAddr += Float.BYTES;
+            bb.putFloat(baseAddr, Options.cloudOpacity / 100.0f);
             baseAddr += Float.BYTES;
-            baseAddr += Float.BYTES; // padding
+            bb.putFloat(baseAddr, Options.cloudAnisotropy / 100.0f);
+            baseAddr += Float.BYTES;
 
             // AtmosphereParams
             baseAddr += Float.BYTES * 4 * 3; // skip

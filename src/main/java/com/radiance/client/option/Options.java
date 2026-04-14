@@ -39,6 +39,11 @@ public class Options {
     public static final String CHUNK_BUILDING_TOTAL_BATCHES_KEY = "options.video.chunk_building_total_batches";
     public static final String PIPELINE_SETUP_KEY = "options.video.pipeline_setup";
 
+    public static final String CATEGORY_CLOUDS = "options.video.category.clouds";
+    public static final String CLOUD_DENSITY_GRADIENT_KEY = "options.video.cloud_density_gradient";
+    public static final String CLOUD_OPACITY_KEY = "options.video.cloud_opacity";
+    public static final String CLOUD_ANISOTROPY_KEY = "options.video.cloud_anisotropy";
+
     public static final String UPSCALER_TYPE_NATIVE = "options.video.upscaler_type.native";
     public static final String UPSCALER_TYPE_FSR3 = "options.video.upscaler_type.fsr3";
 
@@ -60,6 +65,9 @@ public class Options {
     public static int rayBounces = 4;
     public static int chunkBuildingBatchSize = 12;
     public static int chunkBuildingTotalBatches = 12;
+    public static int cloudDensityGradient = 10;   // 0-100 → 0.0-1.0
+    public static int cloudOpacity = 80;            // 0-100 → 0.0-1.0
+    public static int cloudAnisotropy = 80;         // 0-100 → 0.0-1.0
 
     public static void readOptions() {
         Path path = RadianceClient.radianceDir.resolve(OPTION_PROPERTIES);
@@ -85,6 +93,12 @@ public class Options {
             setChunkBuildingTotalBatches(
                 Integer.parseInt(props.getProperty("chunkBuildingTotalBatches",
                     String.valueOf(chunkBuildingTotalBatches))), false);
+            cloudDensityGradient = Integer.parseInt(
+                props.getProperty("cloudDensityGradient", String.valueOf(cloudDensityGradient)));
+            cloudOpacity = Integer.parseInt(
+                props.getProperty("cloudOpacity", String.valueOf(cloudOpacity)));
+            cloudAnisotropy = Integer.parseInt(
+                props.getProperty("cloudAnisotropy", String.valueOf(cloudAnisotropy)));
 
             overwriteConfig();
 //            System.out.println("Successfully read options: " + path);
@@ -106,6 +120,9 @@ public class Options {
         props.setProperty("rayBounces", String.valueOf(rayBounces));
         props.setProperty("chunkBuildingBatchSize", String.valueOf(chunkBuildingBatchSize));
         props.setProperty("chunkBuildingTotalBatches", String.valueOf(chunkBuildingTotalBatches));
+        props.setProperty("cloudDensityGradient", String.valueOf(cloudDensityGradient));
+        props.setProperty("cloudOpacity", String.valueOf(cloudOpacity));
+        props.setProperty("cloudAnisotropy", String.valueOf(cloudAnisotropy));
 
         try {
             Files.createDirectories(path.getParent());

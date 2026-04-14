@@ -214,6 +214,52 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
             new CategoryVideoOptionEntry(Text.translatable(Options.CATEGORY_PIPELINE), body));
         this.body.addSingleOptionEntry(pipelineSettings);
 
+        // ── Clouds category ──
+        SimpleOption<Integer> cloudDensityGradient = new SimpleOption<>(
+            Options.CLOUD_DENSITY_GRADIENT_KEY,
+            SimpleOption.emptyTooltip(),
+            (optionText, value) -> getGenericValueText(optionText,
+                Text.literal(value + "%")),
+            new SimpleOption.ValidatingIntSliderCallbacks(0, 100),
+            Codec.intRange(0, 100),
+            Options.cloudDensityGradient,
+            value -> {
+                Options.cloudDensityGradient = value;
+                Options.overwriteConfig();
+            });
+
+        SimpleOption<Integer> cloudOpacity = new SimpleOption<>(
+            Options.CLOUD_OPACITY_KEY,
+            SimpleOption.emptyTooltip(),
+            (optionText, value) -> getGenericValueText(optionText,
+                Text.literal(value + "%")),
+            new SimpleOption.ValidatingIntSliderCallbacks(0, 100),
+            Codec.intRange(0, 100),
+            Options.cloudOpacity,
+            value -> {
+                Options.cloudOpacity = value;
+                Options.overwriteConfig();
+            });
+
+        SimpleOption<Integer> cloudAnisotropy = new SimpleOption<>(
+            Options.CLOUD_ANISOTROPY_KEY,
+            SimpleOption.emptyTooltip(),
+            (optionText, value) -> getGenericValueText(optionText,
+                Text.literal(value + "%")),
+            new SimpleOption.ValidatingIntSliderCallbacks(0, 100),
+            Codec.intRange(0, 100),
+            Options.cloudAnisotropy,
+            value -> {
+                Options.cloudAnisotropy = value;
+                Options.overwriteConfig();
+            });
+
+        this.body.addEntry(
+            new CategoryVideoOptionEntry(Text.translatable(Options.CATEGORY_CLOUDS), body));
+        this.body.addSingleOptionEntry(cloudDensityGradient);
+        this.body.addSingleOptionEntry(cloudOpacity);
+        this.body.addSingleOptionEntry(cloudAnisotropy);
+
         ci.cancel();
     }
 }
