@@ -4,7 +4,7 @@ inputImageConfigs:
     format: "R16G16B16A16_SFLOAT"
 outputImageConfigs:
   - name: "mapped_output"
-    format: "R8G8B8A8_UNORM"
+    format: "R16G16B16A16_SFLOAT"
 attributeConfigs:
   - name: "render_pipeline.module.tone_mapping.attribute.method"
     type: "enum:render_pipeline.module.tone_mapping.attribute.method.pbr_neutral-render_pipeline.module.tone_mapping.attribute.method.reinhard-render_pipeline.module.tone_mapping.attribute.method.reinhard_white_point-render_pipeline.module.tone_mapping.attribute.method.aces-render_pipeline.module.tone_mapping.attribute.method.aces_white_point-render_pipeline.module.tone_mapping.attribute.method.uncharted2"
@@ -41,7 +41,7 @@ attributeConfigs:
     value: "render_pipeline.true"
   - name: "render_pipeline.module.tone_mapping.attribute.exposure_metering_mode"
     type: "enum:render_pipeline.module.tone_mapping.attribute.exposure_metering_mode.global-render_pipeline.module.tone_mapping.attribute.exposure_metering_mode.center"
-    value: "render_pipeline.module.tone_mapping.attribute.exposure_metering_mode.center"
+    value: "render_pipeline.module.tone_mapping.attribute.exposure_metering_mode.global"
   - name: "render_pipeline.module.tone_mapping.attribute.center_metering_percent"
     type: "float_range:1.0-100.0"
     value: "20.0"

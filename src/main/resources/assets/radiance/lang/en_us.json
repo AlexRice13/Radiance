@@ -1,6 +1,7 @@
 {
   "options.video.category.gameplay": "Game Play",
   "options.video.category.window": "Window",
+  "options.video.category.hdr": "HDR",
   "options.video.category.dlss": "DLSS",
   "options.video.category.ray_tracing": "Ray Tracing",
   "options.video.category.upscaler": "Upscaler",
@@ -32,6 +33,10 @@
   "options.video.chunk_building_batch_size": "Amount of chunks to build in a single submit",
   "options.video.chunk_building_total_batches": "Amount of building chunk batches",
   "options.video.pipeline_setup": "Setup Pipeline...",
+  "options.video.hdr_enabled": "Native HDR Output",
+  "options.video.hdr_min_luminance": "HDR Min Luminance",
+  "options.video.hdr_max_luminance": "HDR Max Luminance",
+  "options.video.hdr_gamma": "HDR Gamma",
   "options.video.category.clouds": "Clouds",
   "options.video.cloud_density_gradient": "Cloud Density Gradient",
   "options.video.cloud_opacity": "Cloud Opacity",

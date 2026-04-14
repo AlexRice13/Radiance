@@ -133,6 +133,42 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
                 }
             });
 
+        SimpleOption<Boolean> enableHdr = SimpleOption.ofBoolean(Options.HDR_ENABLED_KEY,
+            Options.hdrEnabled,
+            value -> {
+                if (MinecraftClient.getInstance()
+                    .getWindow() != null) {
+                    Options.setHdrEnabled(value, true);
+                }
+            });
+
+        SimpleOption<Integer> hdrMinLuminance = new SimpleOption<>(Options.HDR_MIN_LUMINANCE_KEY,
+            SimpleOption.emptyTooltip(),
+            (optionText, value) -> getGenericValueText(optionText,
+                Text.literal(String.format("%.2f nits", value / 100.0f))),
+            new SimpleOption.ValidatingIntSliderCallbacks(0, 1000),
+            Codec.intRange(0, 1000),
+            Math.round(Options.hdrMinLuminance * 100.0f),
+            value -> Options.setHdrMinLuminance(value / 100.0f, true));
+
+        SimpleOption<Integer> hdrMaxLuminance = new SimpleOption<>(Options.HDR_MAX_LUMINANCE_KEY,
+            SimpleOption.emptyTooltip(),
+            (optionText, value) -> getGenericValueText(optionText,
+                Text.literal(value + " nits")),
+            new SimpleOption.ValidatingIntSliderCallbacks(100, 4000),
+            Codec.intRange(100, 4000),
+            Math.round(Options.hdrMaxLuminance),
+            value -> Options.setHdrMaxLuminance(value, true));
+
+        SimpleOption<Integer> hdrGamma = new SimpleOption<>(Options.HDR_GAMMA_KEY,
+            SimpleOption.emptyTooltip(),
+            (optionText, value) -> getGenericValueText(optionText,
+                Text.literal(String.format("%.2f", value / 100.0f))),
+            new SimpleOption.ValidatingIntSliderCallbacks(50, 300),
+            Codec.intRange(50, 300),
+            Math.round(Options.hdrGamma * 100.0f),
+            value -> Options.setHdrGamma(value / 100.0f, true));
+
         SimpleOption<Integer>
             chunkBuildingBatchSize =
             new SimpleOption<>(Options.CHUNK_BUILDING_BATCH_SIZE_KEY,
@@ -204,6 +240,13 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
         };
         this.body.addAll(optionsWindow);
         this.body.addSingleOptionEntry(fullScreenResolutionOption);
+
+        this.body.addEntry(
+            new CategoryVideoOptionEntry(Text.translatable(Options.CATEGORY_HDR), body));
+        this.body.addSingleOptionEntry(enableHdr);
+        this.body.addSingleOptionEntry(hdrMinLuminance);
+        this.body.addSingleOptionEntry(hdrMaxLuminance);
+        this.body.addSingleOptionEntry(hdrGamma);
 
         this.body.addEntry(
             new CategoryVideoOptionEntry(Text.translatable(Options.CATEGORY_TERRAIN), body));

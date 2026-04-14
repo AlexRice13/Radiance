@@ -1,6 +1,7 @@
 {
   "options.video.category.gameplay": "游戏内容",
   "options.video.category.window": "窗口",
+  "options.video.category.hdr": "HDR",
   "options.video.category.dlss": "DLSS",
   "options.video.category.ray_tracing": "光线追踪",
   "options.video.category.upscaler": "超分",
@@ -32,6 +33,10 @@
   "options.video.chunk_building_batch_size": "单次提交构建的区块数",
   "options.video.chunk_building_total_batches": "总构建中的提交数",
   "options.video.pipeline_setup": "设置管线...",
+  "options.video.hdr_enabled": "原生 HDR 输出",
+  "options.video.hdr_min_luminance": "HDR 最小亮度",
+  "options.video.hdr_max_luminance": "HDR 最大亮度",
+  "options.video.hdr_gamma": "HDR Gamma",
   "options.video.category.clouds": "云",
   "options.video.cloud_density_gradient": "云密度渐变",
   "options.video.cloud_opacity": "云不透明度",
