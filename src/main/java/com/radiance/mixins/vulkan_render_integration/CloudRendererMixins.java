@@ -2,9 +2,11 @@ package com.radiance.mixins.vulkan_render_integration;
 
 import com.radiance.client.UnsafeManager;
 import com.radiance.client.constant.Constants;
+import com.radiance.client.proxy.vulkan.BufferProxy;
 import com.radiance.client.proxy.world.EntityProxy;
 import com.radiance.client.vertex.PBRVertexConsumer;
 import com.radiance.client.vertex.StorageVertexConsumerProvider;
+import java.nio.ByteBuffer;
 import net.minecraft.client.gl.GlUsage;
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.option.CloudRenderMode;
@@ -16,6 +18,8 @@ import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -123,6 +127,10 @@ public class CloudRendererMixins {
                 cloudRenderMode == CloudRenderMode.FANCY ? RenderLayer.getFastClouds()
                     : RenderLayer.getNoCullingClouds();
 
+            // Update wind offsets for SkyUBO each frame
+            BufferProxy.cloudWindOffsetX = ticks * 0.030000001F;
+            BufferProxy.cloudWindOffsetZ = 3.96F;
+
             if (this.field_53052 || j != this.centerX || k != this.centerZ
                 || viewMode != this.viewMode ||
                 cloudRenderMode != this.renderMode) {
@@ -133,6 +141,7 @@ public class CloudRendererMixins {
                 this.renderMode = cloudRenderMode;
 
                 this.tessellateClouds(color, j, k, cloudRenderMode, viewMode, renderLayer);
+                this.uploadCloudCoverage();
             }
 
             if (storageVertexConsumerProvider != null) {
@@ -442,6 +451,25 @@ public class CloudRendererMixins {
             builder.vertex(g, 0.0F, j)
                 .normal(-1.0F, 0.0F, 0.0F)
                 .color(northSouthColor);
+        }
+    }
+
+    @Unique
+    private void uploadCloudCoverage() {
+        if (this.cells == null) return;
+        long[] ls = this.cells.cells();
+        int w = this.cells.width();
+        int h = this.cells.height();
+        int totalSize = w * h;
+
+        ByteBuffer buf = MemoryUtil.memAlloc(totalSize);
+        try {
+            for (int idx = 0; idx < totalSize; idx++) {
+                buf.put(idx, ls[idx] != 0L ? (byte) 255 : (byte) 0);
+            }
+            BufferProxy.updateCloudCoverage(MemoryUtil.memAddress(buf), w, h);
+        } finally {
+            MemoryUtil.memFree(buf);
         }
     }
 

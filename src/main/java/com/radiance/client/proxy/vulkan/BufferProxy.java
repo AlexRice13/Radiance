@@ -348,9 +348,9 @@ public class BufferProxy {
 
             bb.putFloat(baseAddr, Options.sunSize * 0.001f); // sunAngularRadius in radians
             baseAddr += Float.BYTES;
-            bb.putFloat(baseAddr, 0.0f); // pad3
+            bb.putFloat(baseAddr, cloudWindOffsetX); // cloudWindOffsetX
             baseAddr += Float.BYTES;
-            bb.putFloat(baseAddr, 0.0f); // pad4
+            bb.putFloat(baseAddr, cloudWindOffsetZ); // cloudWindOffsetZ
             baseAddr += Float.BYTES;
             bb.putFloat(baseAddr, 0.0f); // pad5
             baseAddr += Float.BYTES;
@@ -411,6 +411,12 @@ public class BufferProxy {
     }
 
     public static native void updateLightMapUniform(long ptr);
+
+    public static native void updateCloudCoverage(long ptr, int width, int height);
+
+    // Static fields set by CloudRendererMixins for wind offset
+    public static volatile float cloudWindOffsetX = 0.0f;
+    public static volatile float cloudWindOffsetZ = 3.96f;
 
     public static void updateLightMapUniform(float ambientLightFactor, float skyFactor,
         float blockFactor, boolean useBrightLightmap, Vector3f skyLightColor,
