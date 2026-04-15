@@ -49,6 +49,7 @@ public class Options {
     public static final String CLOUD_DENSITY_GRADIENT_KEY = "options.video.cloud_density_gradient";
     public static final String CLOUD_OPACITY_KEY = "options.video.cloud_opacity";
     public static final String CLOUD_ANISOTROPY_KEY = "options.video.cloud_anisotropy";
+    public static final String CLOUD_EDGE_SOFTNESS_KEY = "options.video.cloud_edge_softness";
 
     public static final String CATEGORY_SUN = "options.video.category.sun";
     public static final String SUN_SIZE_KEY = "options.video.sun_size";
@@ -83,6 +84,7 @@ public class Options {
     public static int cloudDensityGradient = 10;   // 0-100 → 0.0-1.0
     public static int cloudOpacity = 80;            // 0-100 → 0.0-1.0
     public static int cloudAnisotropy = 80;         // 0-100 → 0.0-1.0
+    public static int cloudEdgeSoftness = 30;       // 0-100 → 0.0-1.0 (fraction of cell for edge falloff)
     public static int sunSize = 10;                 // 1-100 → 0.001-0.100 radians
     public static int sunPathTilt = 23;             // 0-45 degrees
 
@@ -129,6 +131,8 @@ public class Options {
                 props.getProperty("cloudOpacity", String.valueOf(cloudOpacity)));
             cloudAnisotropy = Integer.parseInt(
                 props.getProperty("cloudAnisotropy", String.valueOf(cloudAnisotropy)));
+            cloudEdgeSoftness = Integer.parseInt(
+                props.getProperty("cloudEdgeSoftness", String.valueOf(cloudEdgeSoftness)));
             sunSize = Integer.parseInt(
                 props.getProperty("sunSize", String.valueOf(sunSize)));
             sunPathTilt = Integer.parseInt(
@@ -162,6 +166,7 @@ public class Options {
         props.setProperty("cloudDensityGradient", String.valueOf(cloudDensityGradient));
         props.setProperty("cloudOpacity", String.valueOf(cloudOpacity));
         props.setProperty("cloudAnisotropy", String.valueOf(cloudAnisotropy));
+        props.setProperty("cloudEdgeSoftness", String.valueOf(cloudEdgeSoftness));
         props.setProperty("sunSize", String.valueOf(sunSize));
         props.setProperty("sunPathTilt", String.valueOf(sunPathTilt));
 

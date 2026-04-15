@@ -307,11 +307,25 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
                 Options.overwriteConfig();
             });
 
+        SimpleOption<Integer> cloudEdgeSoftness = new SimpleOption<>(
+            Options.CLOUD_EDGE_SOFTNESS_KEY,
+            SimpleOption.emptyTooltip(),
+            (optionText, value) -> getGenericValueText(optionText,
+                Text.literal(value + "%")),
+            new SimpleOption.ValidatingIntSliderCallbacks(1, 100),
+            Codec.intRange(1, 100),
+            Options.cloudEdgeSoftness,
+            value -> {
+                Options.cloudEdgeSoftness = value;
+                Options.overwriteConfig();
+            });
+
         this.body.addEntry(
             new CategoryVideoOptionEntry(Text.translatable(Options.CATEGORY_CLOUDS), body));
         this.body.addSingleOptionEntry(cloudDensityGradient);
         this.body.addSingleOptionEntry(cloudOpacity);
         this.body.addSingleOptionEntry(cloudAnisotropy);
+        this.body.addSingleOptionEntry(cloudEdgeSoftness);
 
         // ── Sun category ──
         SimpleOption<Integer> sunSize = new SimpleOption<>(

@@ -352,7 +352,7 @@ public class BufferProxy {
             baseAddr += Float.BYTES;
             bb.putFloat(baseAddr, cloudWindOffsetZ); // cloudWindOffsetZ
             baseAddr += Float.BYTES;
-            bb.putFloat(baseAddr, 0.0f); // pad5
+            bb.putFloat(baseAddr, Options.cloudEdgeSoftness / 100.0f); // cloudEdgeSoftness
             baseAddr += Float.BYTES;
 
             updateSkyUniform(addr);

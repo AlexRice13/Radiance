@@ -42,6 +42,7 @@
   "options.video.cloud_density_gradient": "Cloud Density Gradient",
   "options.video.cloud_opacity": "Cloud Opacity",
   "options.video.cloud_anisotropy": "Cloud Light Anisotropy",
+  "options.video.cloud_edge_softness": "Cloud Edge Softness",
   "options.video.category.sun": "Sun",
   "options.video.sun_size": "Sun Size",
   "options.video.sun_path_tilt": "Sun Path Tilt",
