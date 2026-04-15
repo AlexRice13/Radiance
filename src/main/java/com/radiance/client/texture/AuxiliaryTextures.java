@@ -110,9 +110,6 @@ public enum AuxiliaryTextures {
                 TextureTracker.Texture texture = TextureTracker.GLID2Texture.get(targetId);
                 if (!auxiliaryTexture.GLIDMapping.containsKey(targetId)) {
                     auxiliaryTargetId = TextureProxy.generateTextureId();
-//                    System.out.println(
-//                        "generate " + auxiliaryTexture.name + " texture for " + targetId + ": "
-//                            + auxiliaryTargetId);
 
                     TextureUtil.prepareImage(texture.format().getNativeImageInternalFormat(),
                         auxiliaryTargetId, texture.maxLayer(), texture.width(), texture.height());
@@ -135,29 +132,76 @@ public enum AuxiliaryTextures {
                     identifier.getPath().contains("textures/block") || identifier.getPath()
                         .contains("textures/item") || identifier.getPath()
                         .contains("textures/entity"))) {
-                    List<Identifier> candidates = auxiliaryTexture.identifierCandidateProvider.get(
-                        identifier, source);
 
-                    boolean success = false;
-                    for (Identifier candidate : candidates) {
-                        Optional<Resource> optionalResource = resourceManager.getResource(
-                            candidate);
-                        if (optionalResource.isPresent()) {
-                            try (NativeImage tmpImage = NativeImage.read(
-                                optionalResource.get().getInputStream())) {
-                                auxiliaryTemplateImage = MipmapUtil.getSpecificMipmapLevelImage(
-                                    tmpImage, level);
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
+                    boolean loadedFromCache = false;
+
+                    // Try disk cache first
+                    NativeImage cached = TextureCache.loadCached(identifier,
+                        auxiliaryTexture.name, level, source.getFormat(),
+                        source.getWidth(), source.getHeight());
+                    if (cached != null) {
+                        auxiliaryTemplateImage = cached;
+                        loadedFromCache = true;
+                    } else {
+                        // Load from resource packs
+                        List<Identifier> candidates =
+                            auxiliaryTexture.identifierCandidateProvider.get(
+                                identifier, source);
+
+                        boolean success = false;
+                        for (Identifier candidate : candidates) {
+                            Optional<Resource> optionalResource = resourceManager.getResource(
+                                candidate);
+                            if (optionalResource.isPresent()) {
+                                try (NativeImage tmpImage = NativeImage.read(
+                                    optionalResource.get().getInputStream())) {
+                                    auxiliaryTemplateImage =
+                                        MipmapUtil.getSpecificMipmapLevelImage(
+                                            tmpImage, level);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+
+                                success = true;
+                                break;
                             }
+                        }
 
-                            success = true;
-                            break;
+                        if (!success) {
+                            auxiliaryTemplateImage = source.applyToCopy(i -> 0);
                         }
                     }
 
-                    if (!success) {
-                        auxiliaryTemplateImage = source.applyToCopy(i -> 0);
+                    // Save to cache if we loaded from resource packs (not from cache)
+                    if (!loadedFromCache && auxiliaryTemplateImage != null) {
+                        NativeImage aligned =
+                            ((com.radiance.mixin_related.extensions.vulkan_render_integration.INativeImageExt) (Object) auxiliaryTemplateImage)
+                                .radiance$alignTo(source);
+                        TextureCache.saveToCache(identifier, auxiliaryTexture.name, level,
+                            aligned);
+                        if (aligned != auxiliaryTemplateImage) {
+                            auxiliaryTemplateImage.close();
+                        }
+                        auxiliaryTemplateImage = aligned;
+                        loadedFromCache = true; // mark so we skip align below
+                    }
+
+                    if (loadedFromCache && auxiliaryTemplateImage != null) {
+                        // Cached images are already aligned
+                        ((INativeImageExt) (Object) auxiliaryTemplateImage).radiance$setTargetID(
+                            auxiliaryTargetId);
+
+                        if (auxiliaryTemplateImage.getWidth() != source.getWidth()
+                            || auxiliaryTemplateImage.getHeight() != source.getHeight()
+                            || auxiliaryTemplateImage.getFormat() != source.getFormat()) {
+                            throw new RuntimeException(
+                                auxiliaryTexture.name + " image size / format mismatch");
+                        }
+
+                        auxiliaryTemplateImage.upload(level, offsetX, offsetY, unpackSkipPixels,
+                            unpackSkipRows, regionWidth, regionHeight, blur);
+                        auxiliaryTexture.setter.set(sourceExt, auxiliaryTemplateImage);
+                        continue;
                     }
                 }
 
