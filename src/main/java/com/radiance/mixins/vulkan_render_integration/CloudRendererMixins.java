@@ -277,181 +277,47 @@ public class CloudRendererMixins {
         long cell) {
         float f = x * 12.0F;
         float g = f + 12.0F;
-        float h = 0.0F;
-        float i = 4.0F;
         float j = z * 12.0F;
         float k = j + 12.0F;
 
-        if (viewMode != CloudRenderer.ViewMode.BELOW_CLOUDS) {
-            builder.vertex(f, 4.0F, j)
-                .normal(0.0F, 1.0F, 0.0F)
-                .color(topColor);
-            builder.vertex(f, 4.0F, k)
-                .normal(0.0F, 1.0F, 0.0F)
-                .color(topColor);
-            builder.vertex(g, 4.0F, k)
-                .normal(0.0F, 1.0F, 0.0F)
-                .color(topColor);
-            builder.vertex(g, 4.0F, j)
-                .normal(0.0F, 1.0F, 0.0F)
-                .color(topColor);
-        }
+        // Always emit all 6 faces so rays can enter from any direction.
+        // Adjacent cells share a face (doubled geometry) — passThrough() handles this.
 
-        if (viewMode != CloudRenderer.ViewMode.ABOVE_CLOUDS) {
-            builder.vertex(g, 0.0F, j)
-                .normal(0.0F, -1.0F, 0.0F)
-                .color(bottomColor);
-            builder.vertex(g, 0.0F, k)
-                .normal(0.0F, -1.0F, 0.0F)
-                .color(bottomColor);
-            builder.vertex(f, 0.0F, k)
-                .normal(0.0F, -1.0F, 0.0F)
-                .color(bottomColor);
-            builder.vertex(f, 0.0F, j)
-                .normal(0.0F, -1.0F, 0.0F)
-                .color(bottomColor);
-        }
+        // Top
+        builder.vertex(f, 4.0F, j).normal(0.0F, 1.0F, 0.0F).color(topColor);
+        builder.vertex(f, 4.0F, k).normal(0.0F, 1.0F, 0.0F).color(topColor);
+        builder.vertex(g, 4.0F, k).normal(0.0F, 1.0F, 0.0F).color(topColor);
+        builder.vertex(g, 4.0F, j).normal(0.0F, 1.0F, 0.0F).color(topColor);
 
-        if (hasBorderNorth(cell) && z > 0) {
-            builder.vertex(f, 0.0F, j)
-                .normal(0.0F, 0.0F, -1.0F)
-                .color(eastWestColor);
-            builder.vertex(f, 4.0F, j)
-                .normal(0.0F, 0.0F, -1.0F)
-                .color(eastWestColor);
-            builder.vertex(g, 4.0F, j)
-                .normal(0.0F, 0.0F, -1.0F)
-                .color(eastWestColor);
-            builder.vertex(g, 0.0F, j)
-                .normal(0.0F, 0.0F, -1.0F)
-                .color(eastWestColor);
-        }
+        // Bottom
+        builder.vertex(g, 0.0F, j).normal(0.0F, -1.0F, 0.0F).color(bottomColor);
+        builder.vertex(g, 0.0F, k).normal(0.0F, -1.0F, 0.0F).color(bottomColor);
+        builder.vertex(f, 0.0F, k).normal(0.0F, -1.0F, 0.0F).color(bottomColor);
+        builder.vertex(f, 0.0F, j).normal(0.0F, -1.0F, 0.0F).color(bottomColor);
 
-        if (hasBorderSouth(cell) && z < 0) {
-            builder.vertex(g, 0.0F, k)
-                .normal(0.0F, 0.0F, 1.0F)
-                .color(eastWestColor);
-            builder.vertex(g, 4.0F, k)
-                .normal(0.0F, 0.0F, 1.0F)
-                .color(eastWestColor);
-            builder.vertex(f, 4.0F, k)
-                .normal(0.0F, 0.0F, 1.0F)
-                .color(eastWestColor);
-            builder.vertex(f, 0.0F, k)
-                .normal(0.0F, 0.0F, 1.0F)
-                .color(eastWestColor);
-        }
+        // North (-Z)
+        builder.vertex(f, 0.0F, j).normal(0.0F, 0.0F, -1.0F).color(eastWestColor);
+        builder.vertex(f, 4.0F, j).normal(0.0F, 0.0F, -1.0F).color(eastWestColor);
+        builder.vertex(g, 4.0F, j).normal(0.0F, 0.0F, -1.0F).color(eastWestColor);
+        builder.vertex(g, 0.0F, j).normal(0.0F, 0.0F, -1.0F).color(eastWestColor);
 
-        if (hasBorderWest(cell) && x > 0) {
-            builder.vertex(f, 0.0F, k)
-                .normal(-1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-            builder.vertex(f, 4.0F, k)
-                .normal(-1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-            builder.vertex(f, 4.0F, j)
-                .normal(-1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-            builder.vertex(f, 0.0F, j)
-                .normal(-1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-        }
+        // South (+Z)
+        builder.vertex(g, 0.0F, k).normal(0.0F, 0.0F, 1.0F).color(eastWestColor);
+        builder.vertex(g, 4.0F, k).normal(0.0F, 0.0F, 1.0F).color(eastWestColor);
+        builder.vertex(f, 4.0F, k).normal(0.0F, 0.0F, 1.0F).color(eastWestColor);
+        builder.vertex(f, 0.0F, k).normal(0.0F, 0.0F, 1.0F).color(eastWestColor);
 
-        if (hasBorderEast(cell) && x < 0) {
-            builder.vertex(g, 0.0F, j)
-                .normal(1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-            builder.vertex(g, 4.0F, j)
-                .normal(1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-            builder.vertex(g, 4.0F, k)
-                .normal(1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-            builder.vertex(g, 0.0F, k)
-                .normal(1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-        }
+        // West (-X)
+        builder.vertex(f, 0.0F, k).normal(-1.0F, 0.0F, 0.0F).color(northSouthColor);
+        builder.vertex(f, 4.0F, k).normal(-1.0F, 0.0F, 0.0F).color(northSouthColor);
+        builder.vertex(f, 4.0F, j).normal(-1.0F, 0.0F, 0.0F).color(northSouthColor);
+        builder.vertex(f, 0.0F, j).normal(-1.0F, 0.0F, 0.0F).color(northSouthColor);
 
-        boolean bl = Math.abs(x) <= 1 && Math.abs(z) <= 1;
-        if (bl) {
-            builder.vertex(g, 4.0F, j)
-                .normal(0.0F, 1.0F, 0.0F)
-                .color(topColor);
-            builder.vertex(g, 4.0F, k)
-                .normal(0.0F, 1.0F, 0.0F)
-                .color(topColor);
-            builder.vertex(f, 4.0F, k)
-                .normal(0.0F, 1.0F, 0.0F)
-                .color(topColor);
-            builder.vertex(f, 4.0F, j)
-                .normal(0.0F, 1.0F, 0.0F)
-                .color(topColor);
-
-            builder.vertex(f, 0.0F, j)
-                .normal(0.0F, 1.0F, 0.0F)
-                .color(bottomColor);
-            builder.vertex(f, 0.0F, k)
-                .normal(0.0F, 1.0F, 0.0F)
-                .color(bottomColor);
-            builder.vertex(g, 0.0F, k)
-                .normal(0.0F, 1.0F, 0.0F)
-                .color(bottomColor);
-            builder.vertex(g, 0.0F, j)
-                .normal(0.0F, 1.0F, 0.0F)
-                .color(bottomColor);
-
-            builder.vertex(g, 0.0F, j)
-                .normal(0.0F, 0.0F, 1.0F)
-                .color(eastWestColor);
-            builder.vertex(g, 4.0F, j)
-                .normal(0.0F, 0.0F, 1.0F)
-                .color(eastWestColor);
-            builder.vertex(f, 4.0F, j)
-                .normal(0.0F, 0.0F, 1.0F)
-                .color(eastWestColor);
-            builder.vertex(f, 0.0F, j)
-                .normal(0.0F, 0.0F, 1.0F)
-                .color(eastWestColor);
-
-            builder.vertex(f, 0.0F, k)
-                .normal(0.0F, 0.0F, -1.0F)
-                .color(eastWestColor);
-            builder.vertex(f, 4.0F, k)
-                .normal(0.0F, 0.0F, -1.0F)
-                .color(eastWestColor);
-            builder.vertex(g, 4.0F, k)
-                .normal(0.0F, 0.0F, -1.0F)
-                .color(eastWestColor);
-            builder.vertex(g, 0.0F, k)
-                .normal(0.0F, 0.0F, -1.0F)
-                .color(eastWestColor);
-
-            builder.vertex(f, 0.0F, j)
-                .normal(1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-            builder.vertex(f, 4.0F, j)
-                .normal(1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-            builder.vertex(f, 4.0F, k)
-                .normal(1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-            builder.vertex(f, 0.0F, k)
-                .normal(1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-
-            builder.vertex(g, 0.0F, k)
-                .normal(-1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-            builder.vertex(g, 4.0F, k)
-                .normal(-1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-            builder.vertex(g, 4.0F, j)
-                .normal(-1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-            builder.vertex(g, 0.0F, j)
-                .normal(-1.0F, 0.0F, 0.0F)
-                .color(northSouthColor);
-        }
+        // East (+X)
+        builder.vertex(g, 0.0F, j).normal(1.0F, 0.0F, 0.0F).color(northSouthColor);
+        builder.vertex(g, 4.0F, j).normal(1.0F, 0.0F, 0.0F).color(northSouthColor);
+        builder.vertex(g, 4.0F, k).normal(1.0F, 0.0F, 0.0F).color(northSouthColor);
+        builder.vertex(g, 0.0F, k).normal(1.0F, 0.0F, 0.0F).color(northSouthColor);
     }
 
     @Unique

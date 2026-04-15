@@ -84,7 +84,7 @@ public class Options {
     public static int cloudDensityGradient = 10;   // 0-100 → 0.0-1.0
     public static int cloudOpacity = 80;            // 0-100 → 0.0-1.0
     public static int cloudAnisotropy = 80;         // 0-100 → 0.0-1.0
-    public static int cloudEdgeSoftness = 30;       // 0-100 → 0.0-1.0 (fraction of cell for edge falloff)
+    public static int cloudEdgeSoftness = 50;       // 0-100 → 0.0-1.0 (bilinear remap threshold)
     public static int sunSize = 10;                 // 1-100 → 0.001-0.100 radians
     public static int sunPathTilt = 23;             // 0-45 degrees
 
