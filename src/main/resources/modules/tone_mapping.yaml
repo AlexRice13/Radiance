@@ -56,7 +56,7 @@ attributeConfigs:
     value: "32.0"
   - name: "render_pipeline.module.tone_mapping.attribute.saturation"
     type: "float_range:0.0-3.0"
-    value: "1.0"
+    value: "1.2"
   - name: "render_pipeline.module.tone_mapping.attribute.clamp_output"
     type: "bool"
     value: "render_pipeline.true"

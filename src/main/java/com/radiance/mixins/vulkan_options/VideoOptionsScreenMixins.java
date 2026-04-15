@@ -164,8 +164,8 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
             SimpleOption.emptyTooltip(),
             (optionText, value) -> getGenericValueText(optionText,
                 Text.literal(String.format("%.2f", value / 100.0f))),
-            new SimpleOption.ValidatingIntSliderCallbacks(50, 300),
-            Codec.intRange(50, 300),
+            new SimpleOption.ValidatingIntSliderCallbacks(10, 300),
+            Codec.intRange(10, 300),
             Math.round(Options.hdrGamma * 100.0f),
             value -> Options.setHdrGamma(value / 100.0f, true));
 

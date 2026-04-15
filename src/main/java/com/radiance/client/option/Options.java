@@ -69,9 +69,9 @@ public class Options {
     public static int inactivityFpsLimit = 260;
     public static boolean vsync = true;
     public static boolean hdrEnabled = true;
-    public static float hdrMinLuminance = 5.0f;
+    public static float hdrMinLuminance = 0.5f;
     public static float hdrMaxLuminance = 1000.0f;
-    public static float hdrGamma = 1.0f;
+    public static float hdrGamma = 0.45f;
     public static float sdrBrightness = 200.0f;
     public static int dlssMode = 1;
     public static int upscalerType = 1;
