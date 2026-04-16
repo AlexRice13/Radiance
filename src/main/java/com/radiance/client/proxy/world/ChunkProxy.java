@@ -252,23 +252,16 @@ public class ChunkProxy {
             builtChunkNum++;
 
             ByteBuffer geometryTypeBB = null;
-            ByteBuffer geometryGroupNameBB = null;
             ByteBuffer geometryTextureBB = null;
             ByteBuffer vertexFormatBB = null;
             ByteBuffer vertexCountBB = null;
             ByteBuffer verticesBB = null;
-            List<ByteBuffer> geometryGroupNameBuffers = new ArrayList<>(buffers.size());
 
             try {
                 int geometryTypeSize = buffers.size() * Integer.BYTES;
                 geometryTypeBB = MemoryUtil.memAlloc(geometryTypeSize);
                 long geometryTypeAddr = memAddress(geometryTypeBB);
                 int geometryTypeBaseAddr = 0;
-
-                int geometryGroupNameSize = buffers.size() * Long.BYTES;
-                geometryGroupNameBB = MemoryUtil.memAlloc(geometryGroupNameSize);
-                long geometryGroupNameAddr = memAddress(geometryGroupNameBB);
-                int geometryGroupNameBaseAddr = 0;
 
                 int geometryTextureSize = buffers.size() * Integer.BYTES;
                 geometryTextureBB = MemoryUtil.memAlloc(geometryTextureSize);
@@ -323,12 +316,6 @@ public class ChunkProxy {
                     geometryTypeBB.putInt(geometryTypeBaseAddr, geometryTypeID);
                     geometryTypeBaseAddr += Integer.BYTES;
 
-                    ByteBuffer geometryGroupNameBuffer = MemoryUtil.memUTF8(renderLayer.name, true);
-                    geometryGroupNameBuffers.add(geometryGroupNameBuffer);
-                    geometryGroupNameBB.putLong(geometryGroupNameBaseAddr,
-                        memAddress(geometryGroupNameBuffer));
-                    geometryGroupNameBaseAddr += Long.BYTES;
-
                     geometryTextureBB.putInt(geometryTextureBaseAddr, geometryTextureID);
                     geometryTextureBaseAddr += Integer.BYTES;
 
@@ -353,7 +340,6 @@ public class ChunkProxy {
                     builtChunk.index,
                     buffers.size(),
                     geometryTypeAddr,
-                    geometryGroupNameAddr,
                     geometryTextureAddr,
                     vertexFormatAddr,
                     vertexCountAddr,
@@ -362,9 +348,6 @@ public class ChunkProxy {
             } finally {
                 if (geometryTypeBB != null) {
                     MemoryUtil.memFree(geometryTypeBB);
-                }
-                if (geometryGroupNameBB != null) {
-                    MemoryUtil.memFree(geometryGroupNameBB);
                 }
                 if (geometryTextureBB != null) {
                     MemoryUtil.memFree(geometryTextureBB);
@@ -377,9 +360,6 @@ public class ChunkProxy {
                 }
                 if (verticesBB != null) {
                     MemoryUtil.memFree(verticesBB);
-                }
-                for (ByteBuffer geometryGroupNameBuffer : geometryGroupNameBuffers) {
-                    MemoryUtil.memFree(geometryGroupNameBuffer);
                 }
             }
         }
@@ -396,7 +376,6 @@ public class ChunkProxy {
         long index,
         int size,
         long geometryTypes,
-        long geometryGroupNames,
         long geometryTextures,
         long vertexFormats,
         long vertexCounts,
