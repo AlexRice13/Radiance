@@ -74,7 +74,7 @@ public class Options {
     public static boolean hdrEnabled = true;
     public static float hdrMinLuminance = 0.5f;
     public static float hdrMaxLuminance = 1000.0f;
-    public static float hdrGamma = 0.45f;
+    public static float hdrGamma = 0.75f;
     public static float sdrBrightness = 200.0f;
     public static int dlssMode = 1;
     public static int upscalerType = 1;
@@ -82,7 +82,7 @@ public class Options {
     public static int denoiserMode = 1;
     public static int rayBounces = 4;
     public static int chunkBuildingBatchSize = 32;
-    public static int chunkBuildingTotalBatches = 20;
+    public static int chunkBuildingTotalBatches = 32;
     public static int cloudDensityGradient = 10;   // 0-100 → 0.0-1.0
     public static int cloudOpacity = 80;            // 0-100 → 0.0-1.0
     public static int cloudAnisotropy = 80;         // 0-100 → 0.0-1.0
