@@ -30,6 +30,9 @@ public class ParticleManagerMixins implements IParticleManagerExt {
     @Final
     @Shadow
     private Map<ParticleTextureSheet, Queue<Particle>> particles;
+    @Final
+    @Shadow
+    private Queue<Particle> newParticles;
 
     @Override
     public List<ParticleTextureSheet> radiance$getTextureSheets() {
@@ -39,6 +42,11 @@ public class ParticleManagerMixins implements IParticleManagerExt {
     @Override
     public Map<ParticleTextureSheet, Queue<Particle>> radiance$getParticles() {
         return particles;
+    }
+
+    @Override
+    public Queue<Particle> radiance$getNewParticles() {
+        return newParticles;
     }
 
     @Inject(method = "addParticle(Lnet/minecraft/client/particle/Particle;)V", at = @At(value = "HEAD"))

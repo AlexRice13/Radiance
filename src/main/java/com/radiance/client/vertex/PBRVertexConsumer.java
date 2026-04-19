@@ -108,7 +108,7 @@ public class PBRVertexConsumer implements VertexConsumer {
                     .getTexture(identifier)
                     .getGlId();
         }
-        this.alphaMode = getAlphaMode(renderLayer);
+        this.alphaMode = getAlphaMode(renderLayer, textureIdentifier);
         this.baseMaterialFlags = getBaseMaterialFlags(textureIdentifier);
         this.materialFlags = 0;
     }
@@ -122,7 +122,11 @@ public class PBRVertexConsumer implements VertexConsumer {
         }
     }
 
-    private static int getAlphaMode(RenderLayer renderLayer) {
+    private static int getAlphaMode(RenderLayer renderLayer, Identifier textureIdentifier) {
+        if (isRainAnisotropicTexture(textureIdentifier)) {
+            return ALPHA_MODE_TRANSPARENT;
+        }
+
         if (!(renderLayer instanceof RenderLayer.MultiPhase multiPhase)) {
             return ALPHA_MODE_OPAQUE;
         }
@@ -143,11 +147,30 @@ public class PBRVertexConsumer implements VertexConsumer {
     }
 
     private static int getBaseMaterialFlags(Identifier textureIdentifier) {
-        if ("minecraft".equals(textureIdentifier.getNamespace())
-            && "textures/environment/rain.png".equals(textureIdentifier.getPath())) {
+        if (isVanillaTexture(textureIdentifier, "textures/environment/rain.png")) {
             return MATERIAL_FLAG_RAIN_PRECIPITATION;
         }
+        if (isRainSplashTexture(textureIdentifier)) {
+            return MATERIAL_FLAG_RAIN_SPLASH;
+        }
         return 0;
+    }
+
+    private static boolean isRainAnisotropicTexture(Identifier textureIdentifier) {
+        return isVanillaTexture(textureIdentifier, "textures/environment/rain.png")
+            || isRainSplashTexture(textureIdentifier);
+    }
+
+    private static boolean isRainSplashTexture(Identifier textureIdentifier) {
+        return isVanillaTexture(textureIdentifier, "textures/particle/splash_0.png")
+            || isVanillaTexture(textureIdentifier, "textures/particle/splash_1.png")
+            || isVanillaTexture(textureIdentifier, "textures/particle/splash_2.png")
+            || isVanillaTexture(textureIdentifier, "textures/particle/splash_3.png");
+    }
+
+    private static boolean isVanillaTexture(Identifier textureIdentifier, String path) {
+        return "minecraft".equals(textureIdentifier.getNamespace())
+            && path.equals(textureIdentifier.getPath());
     }
 
     private int getEncodedAlphaMode() {
