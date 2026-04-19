@@ -75,6 +75,7 @@
   "render_pipeline.module.ray_tracing.attribute.basic_radiance": "基础辐亮度",
   "render_pipeline.module.ray_tracing.attribute.rain_wetness_threshold": "雨天地表湿润阈值",
   "render_pipeline.module.ray_tracing.attribute.enable_volumetric_fog": "启用体积雾",
+  "render_pipeline.module.ray_tracing.attribute.disable_volumetric_fog_in_rain": "下雨时关闭体积雾",
   "render_pipeline.module.ray_tracing.attribute.volumetric_fog_strength": "体积雾强度",
   "render_pipeline.module.ray_tracing.attribute.volumetric_fog_sampling_mode": "体积雾采样模式",
   "render_pipeline.module.ray_tracing.attribute.volumetric_fog_sampling_mode.checkerboard_half": "0.5x 棋盘",

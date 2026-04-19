@@ -75,6 +75,7 @@
   "render_pipeline.module.ray_tracing.attribute.basic_radiance": "Basic Radiance",
   "render_pipeline.module.ray_tracing.attribute.rain_wetness_threshold": "Rain Wetness Threshold",
   "render_pipeline.module.ray_tracing.attribute.enable_volumetric_fog": "Enable Volumetric Fog",
+  "render_pipeline.module.ray_tracing.attribute.disable_volumetric_fog_in_rain": "Disable Volumetric Fog In Rain",
   "render_pipeline.module.ray_tracing.attribute.volumetric_fog_strength": "Volumetric Fog Strength",
   "render_pipeline.module.ray_tracing.attribute.volumetric_fog_sampling_mode": "Volumetric Fog Sampling",
   "render_pipeline.module.ray_tracing.attribute.volumetric_fog_sampling_mode.checkerboard_half": "Checkerboard 0.5x",
