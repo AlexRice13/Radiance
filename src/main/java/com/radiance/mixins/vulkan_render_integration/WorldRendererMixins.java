@@ -313,6 +313,7 @@ public abstract class WorldRendererMixins {
             lightMapManagerExt.radiance$getDarknessScale(),
             lightMapManagerExt.radiance$getDarkenWorldFactor(),
             lightMapManagerExt.radiance$getBrightnessFactor());
+        BufferProxy.updateLocalLights(world, camera);
 
         // Entities
         EntityProxy.queueEntitiesBuild(camera, renderedEntities, this.entityRenderDispatcher,

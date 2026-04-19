@@ -67,6 +67,9 @@ public class ModuleAttributeScreen extends Screen {
 
     @Override
     public void close() {
+        if (parent instanceof RenderPipelineScreen renderPipelineScreen) {
+            renderPipelineScreen.applyCurrentEdits();
+        }
         MinecraftClient.getInstance().setScreen(parent);
     }
 

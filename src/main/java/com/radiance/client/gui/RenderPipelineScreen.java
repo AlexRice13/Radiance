@@ -240,13 +240,17 @@ public class RenderPipelineScreen extends Screen {
         refreshPipeline();
     }
 
-    @Override
-    public void close() {
+    public void applyCurrentEdits() {
         if (mode == Mode.PIPELINE) {
             syncToPipeline();
         } else {
             syncPresetToPipeline();
         }
+    }
+
+    @Override
+    public void close() {
+        applyCurrentEdits();
         MinecraftClient.getInstance().setScreen(parent);
     }
 

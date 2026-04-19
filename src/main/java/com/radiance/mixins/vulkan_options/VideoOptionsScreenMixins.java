@@ -184,8 +184,10 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
                 SimpleOption.emptyTooltip(),
                 (optionText, value) -> getGenericValueText(optionText,
                     Text.literal(Integer.toString(value))),
-                new SimpleOption.ValidatingIntSliderCallbacks(1, 32),
-                Codec.intRange(1, 32),
+                new SimpleOption.ValidatingIntSliderCallbacks(Options.CHUNK_BUILDING_BATCH_SIZE_MIN,
+                    Options.CHUNK_BUILDING_BATCH_SIZE_MAX),
+                Codec.intRange(Options.CHUNK_BUILDING_BATCH_SIZE_MIN,
+                    Options.CHUNK_BUILDING_BATCH_SIZE_MAX),
                 Options.chunkBuildingBatchSize,
                 value -> {
                     Options.setChunkBuildingBatchSize(value, true);

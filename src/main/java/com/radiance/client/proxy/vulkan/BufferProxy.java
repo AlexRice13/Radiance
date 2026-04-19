@@ -10,21 +10,42 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.radiance.client.constant.Constants;
 import com.radiance.client.option.Options;
 import com.radiance.client.texture.TextureTracker;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Map;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.BuiltBuffer;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.Fog;
 import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.VertexFormat;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.client.world.ClientWorld;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
 public class BufferProxy {
+
+    private static final int LOCAL_LIGHT_MAX_COUNT = 96;
+    private static final int LOCAL_LIGHT_SCAN_RADIUS_XZ = 24;
+    private static final int LOCAL_LIGHT_SCAN_RADIUS_Y = 16;
+    private static final int LOCAL_LIGHT_HEADER_SIZE = 16;
+    private static final int LOCAL_LIGHT_STRIDE = 32;
+    private static final int LOCAL_LIGHT_UPDATE_INTERVAL_TICKS = 4;
+    private static final int LOCAL_LIGHT_RESCAN_DISTANCE = 2;
+    private static long lastLocalLightUpdateTick = Long.MIN_VALUE;
+    private static int lastLocalLightCameraBlockX = Integer.MIN_VALUE;
+    private static int lastLocalLightCameraBlockY = Integer.MIN_VALUE;
+    private static int lastLocalLightCameraBlockZ = Integer.MIN_VALUE;
+    private static String lastLocalLightDimensionKey = "";
 
     public static native int allocateBuffer();
 
@@ -412,6 +433,8 @@ public class BufferProxy {
 
     public static native void updateLightMapUniform(long ptr);
 
+    public static native void updateLocalLights(long ptr, int size);
+
     public static native void updateCloudCoverage(long ptr, int width, int height);
 
     // Static fields set by CloudRendererMixins for wind offset
@@ -456,6 +479,144 @@ public class BufferProxy {
 
             updateLightMapUniform(addr);
         }
+    }
+
+    public static void updateLocalLights(ClientWorld world, Camera camera) {
+        if (world != null && camera != null) {
+            Vec3d cameraPos = camera.getPos();
+            int cameraBlockX = net.minecraft.util.math.MathHelper.floor(cameraPos.x);
+            int cameraBlockY = net.minecraft.util.math.MathHelper.floor(cameraPos.y);
+            int cameraBlockZ = net.minecraft.util.math.MathHelper.floor(cameraPos.z);
+            long worldTime = world.getTime();
+            String dimensionKey = world.getRegistryKey().getValue().toString();
+            boolean dimensionChanged = !dimensionKey.equals(lastLocalLightDimensionKey);
+            boolean movedEnough = Math.abs(cameraBlockX - lastLocalLightCameraBlockX) >= LOCAL_LIGHT_RESCAN_DISTANCE
+                || Math.abs(cameraBlockY - lastLocalLightCameraBlockY) >= LOCAL_LIGHT_RESCAN_DISTANCE
+                || Math.abs(cameraBlockZ - lastLocalLightCameraBlockZ) >= LOCAL_LIGHT_RESCAN_DISTANCE;
+            if (!dimensionChanged && !movedEnough
+                && worldTime - lastLocalLightUpdateTick < LOCAL_LIGHT_UPDATE_INTERVAL_TICKS) {
+                return;
+            }
+        }
+
+        int bufferSize = LOCAL_LIGHT_HEADER_SIZE + LOCAL_LIGHT_MAX_COUNT * LOCAL_LIGHT_STRIDE;
+        ByteBuffer bb = MemoryUtil.memAlloc(bufferSize);
+        try {
+            bb.clear();
+            if (world == null || camera == null) {
+                lastLocalLightUpdateTick = Long.MIN_VALUE;
+                lastLocalLightCameraBlockX = Integer.MIN_VALUE;
+                lastLocalLightCameraBlockY = Integer.MIN_VALUE;
+                lastLocalLightCameraBlockZ = Integer.MIN_VALUE;
+                lastLocalLightDimensionKey = "";
+                bb.putInt(0, 0);
+                bb.putInt(4, LOCAL_LIGHT_MAX_COUNT);
+                updateLocalLights(MemoryUtil.memAddress(bb), bufferSize);
+                return;
+            }
+
+            Vec3d cameraPos = camera.getPos();
+            int cameraBlockX = net.minecraft.util.math.MathHelper.floor(cameraPos.x);
+            int cameraBlockY = net.minecraft.util.math.MathHelper.floor(cameraPos.y);
+            int cameraBlockZ = net.minecraft.util.math.MathHelper.floor(cameraPos.z);
+            int minY = Math.max(world.getBottomY(), cameraBlockY - LOCAL_LIGHT_SCAN_RADIUS_Y);
+            int maxY = Math.min(world.getTopYInclusive(), cameraBlockY + LOCAL_LIGHT_SCAN_RADIUS_Y);
+
+            List<LocalLightCandidate> candidates = new ArrayList<>();
+            BlockPos.Mutable mutablePos = new BlockPos.Mutable();
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = cameraBlockZ - LOCAL_LIGHT_SCAN_RADIUS_XZ;
+                     z <= cameraBlockZ + LOCAL_LIGHT_SCAN_RADIUS_XZ; z++) {
+                    for (int x = cameraBlockX - LOCAL_LIGHT_SCAN_RADIUS_XZ;
+                         x <= cameraBlockX + LOCAL_LIGHT_SCAN_RADIUS_XZ; x++) {
+                        mutablePos.set(x, y, z);
+                        BlockState state = world.getBlockState(mutablePos);
+                        int luminance = state.getLuminance();
+                        if (luminance <= 0) {
+                            continue;
+                        }
+
+                        float relX = (float) (x + 0.5 - cameraPos.x);
+                        float relY = (float) (y + 0.5 - cameraPos.y);
+                        float relZ = (float) (z + 0.5 - cameraPos.z);
+                        float distanceSq = relX * relX + relY * relY + relZ * relZ;
+                        if (distanceSq > LOCAL_LIGHT_SCAN_RADIUS_XZ * LOCAL_LIGHT_SCAN_RADIUS_XZ * 4.0f) {
+                            continue;
+                        }
+
+                        Vector3f color = approximateLocalLightColor(state);
+                        float intensity = Math.max(0.05f, luminance / 15.0f);
+                        float radius = 2.5f + luminance * 0.9f;
+                        float score = intensity / (1.0f + distanceSq * 0.02f);
+                        candidates.add(new LocalLightCandidate(score, relX, relY, relZ, radius, color.x, color.y,
+                            color.z, intensity));
+                    }
+                }
+            }
+
+            candidates.sort(Comparator.comparingDouble(LocalLightCandidate::score).reversed());
+            int lightCount = Math.min(candidates.size(), LOCAL_LIGHT_MAX_COUNT);
+            bb.putInt(0, lightCount);
+            bb.putInt(4, LOCAL_LIGHT_MAX_COUNT);
+
+            int baseAddr = LOCAL_LIGHT_HEADER_SIZE;
+            for (int i = 0; i < lightCount; i++) {
+                LocalLightCandidate light = candidates.get(i);
+                bb.putFloat(baseAddr, light.x());
+                bb.putFloat(baseAddr + 4, light.y());
+                bb.putFloat(baseAddr + 8, light.z());
+                bb.putFloat(baseAddr + 12, light.radius());
+                bb.putFloat(baseAddr + 16, light.r());
+                bb.putFloat(baseAddr + 20, light.g());
+                bb.putFloat(baseAddr + 24, light.b());
+                bb.putFloat(baseAddr + 28, light.intensity());
+                baseAddr += LOCAL_LIGHT_STRIDE;
+            }
+
+            updateLocalLights(MemoryUtil.memAddress(bb), bufferSize);
+            lastLocalLightUpdateTick = world.getTime();
+            lastLocalLightCameraBlockX = cameraBlockX;
+            lastLocalLightCameraBlockY = cameraBlockY;
+            lastLocalLightCameraBlockZ = cameraBlockZ;
+            lastLocalLightDimensionKey = world.getRegistryKey().getValue().toString();
+        } finally {
+            MemoryUtil.memFree(bb);
+        }
+    }
+
+    private static Vector3f approximateLocalLightColor(BlockState state) {
+        String path = Registries.BLOCK.getId(state.getBlock()).getPath();
+        if (path.contains("soul")) {
+            return new Vector3f(0.35f, 0.8f, 1.35f);
+        }
+        if (path.contains("lava") || path.contains("magma")) {
+            return new Vector3f(1.4f, 0.6f, 0.2f);
+        }
+        if (path.contains("redstone")) {
+            return new Vector3f(1.25f, 0.2f, 0.12f);
+        }
+        if (path.contains("sea_lantern") || path.contains("beacon") || path.contains("end_rod")) {
+            return new Vector3f(0.85f, 1.0f, 1.2f);
+        }
+        if (path.contains("verdant")) {
+            return new Vector3f(0.65f, 1.1f, 0.75f);
+        }
+        if (path.contains("pearlescent")) {
+            return new Vector3f(1.05f, 0.8f, 1.1f);
+        }
+        if (path.contains("ochre")) {
+            return new Vector3f(1.2f, 0.82f, 0.45f);
+        }
+        if (path.contains("torch") || path.contains("lantern") || path.contains("campfire")
+            || path.contains("candle") || path.contains("glowstone") || path.contains("shroomlight")
+            || path.contains("jack_o_lantern")) {
+            return new Vector3f(1.2f, 0.86f, 0.55f);
+        }
+        return new Vector3f(1.0f, 0.92f, 0.8f);
+    }
+
+    private record LocalLightCandidate(double score, float x, float y, float z, float radius, float r, float g,
+                                       float b, float intensity) {
     }
 
     public record BufferInfo(ByteBuffer buf, long addr, int size) {

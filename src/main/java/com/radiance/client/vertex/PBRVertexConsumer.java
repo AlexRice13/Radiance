@@ -44,6 +44,12 @@ public class PBRVertexConsumer implements VertexConsumer {
     private static final int ALPHA_MODE_OPAQUE = 0;
     private static final int ALPHA_MODE_CUTOUT = 1;
     private static final int ALPHA_MODE_TRANSPARENT = 2;
+    private static final int ALPHA_MODE_MASK = 0xF;
+    public static final int MATERIAL_FLAG_RAIN_EXPOSED = 1 << 4;
+    public static final int MATERIAL_FLAG_RAIN_PRECIPITATION = 1 << 5;
+    public static final int MATERIAL_FLAG_RAIN_SPLASH = 1 << 6;
+    private static final int MATERIAL_FLAG_MASK =
+        MATERIAL_FLAG_RAIN_EXPOSED | MATERIAL_FLAG_RAIN_PRECIPITATION | MATERIAL_FLAG_RAIN_SPLASH;
 
     private final BufferAllocator allocator;
     private final VertexFormat format;
@@ -60,6 +66,8 @@ public class PBRVertexConsumer implements VertexConsumer {
     private boolean building = true;
     private int textureID;
     private final int alphaMode;
+    private final int baseMaterialFlags;
+    private int materialFlags;
     private float baseX = 0;
     private float baseY = 0;
     private float baseZ = 0;
@@ -87,11 +95,13 @@ public class PBRVertexConsumer implements VertexConsumer {
             throw new IllegalArgumentException("PBR format must contain POSITION element");
         }
 
-        if (renderLayer instanceof RenderLayer.MultiPhase) {
+        Identifier textureIdentifier = MissingSprite.getMissingSpriteId();
+        if (renderLayer instanceof RenderLayer.MultiPhase multiPhase) {
             Identifier
                 identifier =
-                ((RenderLayer.MultiPhase) renderLayer).phases.texture.getId()
+                multiPhase.phases.texture.getId()
                     .orElse(MissingSprite.getMissingSpriteId());
+            textureIdentifier = identifier;
             textureID =
                 MinecraftClient.getInstance()
                     .getTextureManager()
@@ -99,6 +109,8 @@ public class PBRVertexConsumer implements VertexConsumer {
                     .getGlId();
         }
         this.alphaMode = getAlphaMode(renderLayer);
+        this.baseMaterialFlags = getBaseMaterialFlags(textureIdentifier);
+        this.materialFlags = 0;
     }
 
     private static void putInt(long ptr, int v) {
@@ -130,6 +142,18 @@ public class PBRVertexConsumer implements VertexConsumer {
         return ALPHA_MODE_TRANSPARENT;
     }
 
+    private static int getBaseMaterialFlags(Identifier textureIdentifier) {
+        if ("minecraft".equals(textureIdentifier.getNamespace())
+            && "textures/environment/rain.png".equals(textureIdentifier.getPath())) {
+            return MATERIAL_FLAG_RAIN_PRECIPITATION;
+        }
+        return 0;
+    }
+
+    private int getEncodedAlphaMode() {
+        return (this.alphaMode & ALPHA_MODE_MASK) | this.baseMaterialFlags | this.materialFlags;
+    }
+
     public VertexFormat getFormat() {
         return this.format;
     }
@@ -142,6 +166,10 @@ public class PBRVertexConsumer implements VertexConsumer {
         this.baseX = x;
         this.baseY = y;
         this.baseZ = z;
+    }
+
+    public void setMaterialFlags(int materialFlags) {
+        this.materialFlags = materialFlags & MATERIAL_FLAG_MASK;
     }
 
     private void ensureBuilding() {
@@ -206,8 +234,8 @@ public class PBRVertexConsumer implements VertexConsumer {
             MemoryUtil.memPutFloat(ptr + offBase, baseX);
             MemoryUtil.memPutFloat(ptr + offBase + 4L, baseY);
             MemoryUtil.memPutFloat(ptr + offBase + 8L, baseZ);
-            // Reuse the trailing padding word after postBase for alpha mode.
-            putInt(ptr + offBase + 12L, this.alphaMode);
+            // Reuse the trailing padding word after postBase for alpha mode and material flags.
+            putInt(ptr + offBase + 12L, this.getEncodedAlphaMode());
         }
 
         return ptr;
@@ -234,8 +262,8 @@ public class PBRVertexConsumer implements VertexConsumer {
             MemoryUtil.memPutFloat(ptr + offBase, baseX);
             MemoryUtil.memPutFloat(ptr + offBase + 4L, baseY);
             MemoryUtil.memPutFloat(ptr + offBase + 8L, baseZ);
-            // Reuse the trailing padding word after postBase for alpha mode.
-            putInt(ptr + offBase + 12L, this.alphaMode);
+            // Reuse the trailing padding word after postBase for alpha mode and material flags.
+            putInt(ptr + offBase + 12L, this.getEncodedAlphaMode());
         }
 
         if (glintTextureID != 0) {

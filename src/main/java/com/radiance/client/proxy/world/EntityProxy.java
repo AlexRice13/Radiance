@@ -535,6 +535,8 @@ public class EntityProxy {
             Queue<Particle> particleQueue = particles.get(particleTextureSheet);
             if (particleQueue != null && !particleQueue.isEmpty()) {
                 for (Particle particle : particleQueue) {
+                    postStorageVertexConsumerProvider.setMaterialFlags(
+                        getParticleMaterialFlags(particle));
 
                     VertexConsumer
                         vertexConsumer =
@@ -555,6 +557,7 @@ public class EntityProxy {
                 }
             }
         }
+        postStorageVertexConsumerProvider.setMaterialFlags(0);
 
         processPostEntityRenderData(postStorageVertexConsumerProvider, 0, 0, 0, 0, renderDataList);
 
@@ -654,6 +657,14 @@ public class EntityProxy {
             false);
     }
 
+    private static int getParticleMaterialFlags(Particle particle) {
+        String simpleName = particle.getClass().getSimpleName();
+        if ("RainSplashParticle".equals(simpleName) || "WaterSplashParticle".equals(simpleName)) {
+            return PBRVertexConsumer.MATERIAL_FLAG_RAIN_SPLASH;
+        }
+        return 0;
+    }
+
     public static void queueWeatherBuild(WeatherRendering weatherRendering,
         WorldBorderRendering worldBorderRendering,
         ClientWorld world,
@@ -663,12 +674,18 @@ public class EntityProxy {
         List<StorageVertexConsumerProvider> storageVertexConsumerProviders = new ArrayList<>();
         EntityRenderDataList renderDataList = new EntityRenderDataList();
 
-        StorageVertexConsumerProvider storageVertexConsumerProvider = new StorageVertexConsumerProvider(
+        StorageVertexConsumerProvider weatherStorageVertexConsumerProvider = new StorageVertexConsumerProvider(
             0);
-        storageVertexConsumerProviders.add(storageVertexConsumerProvider);
+        storageVertexConsumerProviders.add(weatherStorageVertexConsumerProvider);
 
-        weatherRendering.renderPrecipitation(world, storageVertexConsumerProvider, ticks, tickDelta,
+        weatherRendering.renderPrecipitation(world, weatherStorageVertexConsumerProvider, ticks, tickDelta,
             camera.getPos());
+        processWorldEntityRenderData(weatherStorageVertexConsumerProvider, 0, 0, 0, 0,
+            Constants.RayTracingFlags.WEATHER, true, renderDataList);
+
+        StorageVertexConsumerProvider postStorageVertexConsumerProvider = new StorageVertexConsumerProvider(
+            0);
+        storageVertexConsumerProviders.add(postStorageVertexConsumerProvider);
 
         MinecraftClient client = MinecraftClient.getInstance();
         int clampedViewDistance = client.options.getClampedViewDistance() * 16;
@@ -676,7 +693,7 @@ public class EntityProxy {
         worldBorderRendering.render(world.getWorldBorder(), camera.getPos(), clampedViewDistance,
             farPlaneDistance);
 
-        processPostEntityRenderData(storageVertexConsumerProvider, 0, 0, 0, 0, renderDataList);
+        processPostEntityRenderData(postStorageVertexConsumerProvider, 0, 0, 0, 0, renderDataList);
 
         queueBuild(storageVertexConsumerProviders, renderDataList, 0.0f,
             Constants.Coordinates.CAMERA_SHIFT, false);

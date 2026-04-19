@@ -38,6 +38,8 @@ public class Options {
     public static final String RAY_BOUNCES_KEY = "options.video.ray_bounces";
     public static final String CHUNK_BUILDING_BATCH_SIZE_KEY = "options.video.chunk_building_batch_size";
     public static final String CHUNK_BUILDING_TOTAL_BATCHES_KEY = "options.video.chunk_building_total_batches";
+    public static final int CHUNK_BUILDING_BATCH_SIZE_MIN = 1;
+    public static final int CHUNK_BUILDING_BATCH_SIZE_MAX = 64;
     public static final String PIPELINE_SETUP_KEY = "options.video.pipeline_setup";
     public static final String HDR_ENABLED_KEY = "options.video.hdr_enabled";
     public static final String HDR_MIN_LUMINANCE_KEY = "options.video.hdr_min_luminance";
@@ -79,7 +81,7 @@ public class Options {
     public static int upscalerQuality = 1;
     public static int denoiserMode = 1;
     public static int rayBounces = 4;
-    public static int chunkBuildingBatchSize = 20;
+    public static int chunkBuildingBatchSize = 32;
     public static int chunkBuildingTotalBatches = 20;
     public static int cloudDensityGradient = 10;   // 0-100 → 0.0-1.0
     public static int cloudOpacity = 80;            // 0-100 → 0.0-1.0
@@ -268,8 +270,9 @@ public class Options {
         boolean write);
 
     public static void setChunkBuildingBatchSize(int chunkBuildingBatchSize, boolean write) {
-        Options.chunkBuildingBatchSize = chunkBuildingBatchSize;
-        nativeSetChunkBuildingBatchSize(chunkBuildingBatchSize, write);
+        Options.chunkBuildingBatchSize = Math.max(CHUNK_BUILDING_BATCH_SIZE_MIN,
+            Math.min(CHUNK_BUILDING_BATCH_SIZE_MAX, chunkBuildingBatchSize));
+        nativeSetChunkBuildingBatchSize(Options.chunkBuildingBatchSize, write);
         if (write) {
             overwriteConfig();
         }
