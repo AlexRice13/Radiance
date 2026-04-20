@@ -48,8 +48,9 @@ public class PBRVertexConsumer implements VertexConsumer {
     public static final int MATERIAL_FLAG_RAIN_EXPOSED = 1 << 4;
     public static final int MATERIAL_FLAG_RAIN_PRECIPITATION = 1 << 5;
     public static final int MATERIAL_FLAG_RAIN_SPLASH = 1 << 6;
+    public static final int MATERIAL_FLAG_WATER = 1 << 7;
     private static final int MATERIAL_FLAG_MASK =
-        MATERIAL_FLAG_RAIN_EXPOSED | MATERIAL_FLAG_RAIN_PRECIPITATION | MATERIAL_FLAG_RAIN_SPLASH;
+        MATERIAL_FLAG_RAIN_EXPOSED | MATERIAL_FLAG_RAIN_PRECIPITATION | MATERIAL_FLAG_RAIN_SPLASH | MATERIAL_FLAG_WATER;
 
     private final BufferAllocator allocator;
     private final VertexFormat format;

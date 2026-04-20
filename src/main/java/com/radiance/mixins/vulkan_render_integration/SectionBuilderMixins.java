@@ -26,6 +26,7 @@ import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.Direction;
@@ -96,7 +97,8 @@ public abstract class SectionBuilderMixins {
                 RenderLayer renderLayer = RenderLayers.getFluidLayer(fluidState);
                 PBRVertexConsumer bufferBuilder = this.beginBufferBuilding(map, allocatorStorage,
                     renderLayer);
-                bufferBuilder.setMaterialFlags(0);
+                bufferBuilder.setMaterialFlags(
+                    fluidState.isIn(FluidTags.WATER) ? PBRVertexConsumer.MATERIAL_FLAG_WATER : 0);
                 this.blockRenderManager.renderFluid(blockPos3, renderRegion, bufferBuilder,
                     blockState, fluidState);
             }
