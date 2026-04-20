@@ -2,6 +2,28 @@
 
 > 这里是Radiance mod的Java部分。C++部分请访问[Minecraft Vulkan Renderer (MCVR)](https://github.com/Minecraft-Radiance/MCVR)
 
+# Fork 状态
+
+本仓库是原始 [Radiance](https://github.com/Minecraft-Radiance/Radiance) 项目的 fork。以下是本 fork 相对上游所做的改动说明。
+
+## 已实现 / 正在使用
+
+1. **基于太阳仰角的天体光照门控** — 根据太阳仰角动态控制光照。
+2. **体积云与云阴影** — 光线步进体积云及其对应的阴影投射。
+3. **光线追踪雨滴** — 通过光线追踪渲染的雨滴粒子。
+4. **光线追踪体积雾** — 通过光线追踪实现的体积雾效果。
+5. **HDR** — 高动态范围渲染支持。
+
+## 未成功实现
+
+1. **SER（着色器执行重排序）** — 进行了多次尝试，包括启用主光线命中 SER 和回退实验，但由于稳定性问题和随机全零返回值，该功能未能在本 fork 中成为可发布的特性。
+
+## 声明
+
+本 fork 目前承载的所有改动均通过 **GitHub Copilot vibe-coding 工作流**完成，包括探索、实现、调试、回滚和最终集成。本项目由 **Claude Opus 4.6–4.7** 和 **GPT-5.4** 协力完成，为纯 vibe-coding 产物。
+
+---
+
 # Radiance
 
 Radiance是一个Minecraft Mod，旨在将原版的OpenGL渲染器完全替换成我们的高性能Vulkan C++渲染器，并且支持硬件加速光线追踪。

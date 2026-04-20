@@ -2,6 +2,28 @@
 
 > This is the Java part of the Radiance mod. For C++ part, please refer to [Minecraft Vulkan Renderer (MCVR)](https://github.com/Minecraft-Radiance/MCVR)
 
+# Fork Status
+
+This is a fork of the original [Radiance](https://github.com/Minecraft-Radiance/Radiance) project. The following describes the changes made in this fork relative to upstream.
+
+## Implemented / Actively Used
+
+1. **Sun-elevation-based celestial light gating** — lighting is dynamically gated based on the sun's elevation angle.
+2. **Volumetric clouds and cloud shadows** — ray-marched volumetric clouds with corresponding shadow casting.
+3. **Ray-traced rain droplets** — rain particles rendered via ray tracing.
+4. **Ray-traced volumetric fog** — volumetric fog effect implemented with ray tracing.
+5. **HDR** — high dynamic range rendering support.
+
+## Not Successfully Implemented
+
+1. **SER (Shader Execution Reordering)** — multiple attempts were made, including enabling primary-hit SER and fallback experiments, but stability issues and random all-zero returns prevented it from becoming a shippable feature in this fork.
+
+## Statement
+
+All changes currently carried by this fork were produced through a **GitHub Copilot vibe-coding workflow**, including exploration, implementation, debugging, rollback, and final integration. This work was completed collaboratively by **Claude Opus 4.6–4.7** and **GPT-5.4**.
+
+---
+
 # Radiance
 
 [Radiance](https://www.minecraft-radiance.com/) is a Minecraft mod that completely replace the vanilla OpenGL renderer with our Vulkan C++ renderer, which supports high performance rendering and hardware-accelerated ray tracing.
