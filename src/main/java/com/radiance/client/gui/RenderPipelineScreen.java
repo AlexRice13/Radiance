@@ -927,6 +927,9 @@ public class RenderPipelineScreen extends Screen {
                 continue;
             }
             for (AttributeConfig cfg : m.attributeConfigs) {
+                if (AttributeWidgetUtil.shouldHideForHdr(cfg)) {
+                    continue;
+                }
                 List<ClickableWidget> ws = buildPresetWidgets(cfg);
                 for (ClickableWidget w : ws) {
                     presetWidgets.add(addDrawableChild(w));

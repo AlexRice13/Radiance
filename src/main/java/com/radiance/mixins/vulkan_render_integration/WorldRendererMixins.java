@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.radiance.client.UnsafeManager;
 import com.radiance.client.proxy.vulkan.BufferProxy;
 import com.radiance.client.option.Options;
+import com.radiance.client.proxy.vulkan.RendererProxy;
 import com.radiance.client.proxy.world.ChunkProxy;
 import com.radiance.client.proxy.world.EntityProxy;
 import com.radiance.client.proxy.world.PlayerProxy;
@@ -53,6 +54,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.profiler.Profiler;
+import net.minecraft.world.LightType;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -300,6 +302,27 @@ public abstract class WorldRendererMixins {
             horizontalColorG, horizontalColorB, horizontalColorA, sunDirection, skyType,
             sunRisingOrSetting, skyDark, hasBlindnessOrDarkness, submersionType, moonPhase,
             rainGradient, sunTextureID, moonTextureID);
+
+        BlockPos cameraBlockPos = BlockPos.ofFloored(camera.getPos());
+        String biomeKey = world.getBiome(cameraBlockPos)
+            .getKey()
+            .map(key -> key.getValue().toString())
+            .orElse("");
+        boolean skyVisible = world.isSkyVisible(cameraBlockPos);
+        int skyLight = world.getLightLevel(LightType.SKY, cameraBlockPos);
+        int surfaceY = world.getTopY(net.minecraft.world.Heightmap.Type.MOTION_BLOCKING,
+            cameraBlockPos.getX(), cameraBlockPos.getZ());
+        boolean indoors = !skyVisible;
+        boolean cave = !skyVisible && skyLight <= 0 && (surfaceY - cameraBlockPos.getY()) >= 8;
+        String submersion = switch (camera.getSubmersionType()) {
+            case WATER -> "water";
+            case LAVA -> "lava";
+            case POWDER_SNOW -> "powder_snow";
+            default -> "air";
+        };
+        RendererProxy.updateScenarioSceneContext(world.getRegistryKey().getValue().toString(),
+            biomeKey, world.getTimeOfDay(), world.isRaining(), world.isThundering(), submersion,
+            indoors, cave);
 
         BufferProxy.updateMapping();
 

@@ -1,5 +1,6 @@
 package com.radiance.client.gui;
 
+import com.radiance.client.option.Options;
 import com.radiance.client.pipeline.config.AttributeConfig;
 
 import java.util.List;
@@ -16,7 +17,13 @@ import net.minecraft.util.math.MathHelper;
 
 final class AttributeWidgetUtil {
 
+    private static final String TONE_MAPPING_GAMMA_ATTRIBUTE = "render_pipeline.module.tone_mapping.attribute.gamma";
+
     private AttributeWidgetUtil() {
+    }
+
+    static boolean shouldHideForHdr(AttributeConfig cfg) {
+        return Options.isHdrToneMappingActive() && cfg != null && TONE_MAPPING_GAMMA_ATTRIBUTE.equals(cfg.name);
     }
 
     static boolean shouldValidateBorder(String type) {

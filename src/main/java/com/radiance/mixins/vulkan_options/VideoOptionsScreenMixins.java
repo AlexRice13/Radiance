@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.radiance.client.gui.PotentialValuesBasedCallbacksNoValue;
 import com.radiance.client.gui.RenderPipelineScreen;
+import com.radiance.client.gui.ScenarioColorGradingScreen;
 import com.radiance.client.option.Options;
 import com.radiance.client.util.CategoryVideoOptionEntry;
 import java.util.Arrays;
@@ -160,14 +161,14 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
             Math.round(Options.hdrMaxLuminance),
             value -> Options.setHdrMaxLuminance(value, true));
 
-        SimpleOption<Integer> hdrGamma = new SimpleOption<>(Options.HDR_GAMMA_KEY,
+        SimpleOption<Integer> hdrRollOff = new SimpleOption<>(Options.HDR_ROLL_OFF_KEY,
             SimpleOption.emptyTooltip(),
             (optionText, value) -> getGenericValueText(optionText,
                 Text.literal(String.format("%.2f", value / 100.0f))),
-            new SimpleOption.ValidatingIntSliderCallbacks(10, 300),
-            Codec.intRange(10, 300),
-            Math.round(Options.hdrGamma * 100.0f),
-            value -> Options.setHdrGamma(value / 100.0f, true));
+            new SimpleOption.ValidatingIntSliderCallbacks(25, 400),
+            Codec.intRange(25, 400),
+            Math.round(Options.hdrRollOff * 100.0f),
+            value -> Options.setHdrRollOff(value / 100.0f, true));
 
         SimpleOption<Integer> sdrBrightness = new SimpleOption<>(Options.SDR_BRIGHTNESS_KEY,
             SimpleOption.emptyTooltip(),
@@ -216,6 +217,16 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
                     .setScreen(new RenderPipelineScreen((VideoOptionsScreen) (Object) this));
             });
 
+        SimpleOption<Boolean> scenarioColorGrading = new SimpleOption<>(Options.SCENARIO_COLOR_GRADING_KEY,
+            SimpleOption.emptyTooltip(),
+            (optionText, value) -> optionText,
+            BOOLEAN_NO_KEY,
+            false,
+            value -> {
+                MinecraftClient.getInstance()
+                    .setScreen(new ScenarioColorGradingScreen((VideoOptionsScreen) (Object) this));
+            });
+
         // Adding categories and options
         this.body.addEntry(
             new CategoryVideoOptionEntry(Text.translatable(Options.CATEGORY_GAMEPLAY), body));
@@ -257,7 +268,7 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
         this.body.addSingleOptionEntry(enableHdr);
         this.body.addSingleOptionEntry(hdrMinLuminance);
         this.body.addSingleOptionEntry(hdrMaxLuminance);
-        this.body.addSingleOptionEntry(hdrGamma);
+        this.body.addSingleOptionEntry(hdrRollOff);
         this.body.addSingleOptionEntry(sdrBrightness);
 
         this.body.addEntry(
@@ -268,6 +279,7 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
         this.body.addEntry(
             new CategoryVideoOptionEntry(Text.translatable(Options.CATEGORY_PIPELINE), body));
         this.body.addSingleOptionEntry(pipelineSettings);
+        this.body.addSingleOptionEntry(scenarioColorGrading);
 
         // ── Clouds category ──
         SimpleOption<Integer> cloudDensityGradient = new SimpleOption<>(

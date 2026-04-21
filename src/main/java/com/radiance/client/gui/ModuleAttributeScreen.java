@@ -2,7 +2,6 @@ package com.radiance.client.gui;
 
 import com.radiance.client.pipeline.Module;
 import com.radiance.client.pipeline.config.AttributeConfig;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -56,6 +55,9 @@ public class ModuleAttributeScreen extends Screen {
         }
 
         for (AttributeConfig cfg : list) {
+            if (AttributeWidgetUtil.shouldHideForHdr(cfg)) {
+                continue;
+            }
             List<ClickableWidget> ws = AttributeWidgetUtil.buildWidgets(cfg, textRenderer, WIDGET_WIDTH,
                 VEC3_COMPONENT_WIDTH);
             for (ClickableWidget w : ws) {

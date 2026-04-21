@@ -41,10 +41,11 @@ public class Options {
     public static final int CHUNK_BUILDING_BATCH_SIZE_MIN = 1;
     public static final int CHUNK_BUILDING_BATCH_SIZE_MAX = 64;
     public static final String PIPELINE_SETUP_KEY = "options.video.pipeline_setup";
+    public static final String SCENARIO_COLOR_GRADING_KEY = "options.video.scenario_color_grading";
     public static final String HDR_ENABLED_KEY = "options.video.hdr_enabled";
     public static final String HDR_MIN_LUMINANCE_KEY = "options.video.hdr_min_luminance";
     public static final String HDR_MAX_LUMINANCE_KEY = "options.video.hdr_max_luminance";
-    public static final String HDR_GAMMA_KEY = "options.video.hdr_gamma";
+    public static final String HDR_ROLL_OFF_KEY = "options.video.hdr_roll_off";
     public static final String SDR_BRIGHTNESS_KEY = "options.video.sdr_brightness";
 
     public static final String CATEGORY_CLOUDS = "options.video.category.clouds";
@@ -74,7 +75,7 @@ public class Options {
     public static boolean hdrEnabled = true;
     public static float hdrMinLuminance = 0.5f;
     public static float hdrMaxLuminance = 1000.0f;
-    public static float hdrGamma = 0.75f;
+    public static float hdrRollOff = 1.0f;
     public static float sdrBrightness = 200.0f;
     public static int dlssMode = 1;
     public static int upscalerType = 1;
@@ -116,7 +117,8 @@ public class Options {
             setHdrMaxLuminance(Float.parseFloat(props.getProperty("hdrMaxLuminance",
                     String.valueOf(hdrMaxLuminance))),
                 false);
-            setHdrGamma(Float.parseFloat(props.getProperty("hdrGamma", String.valueOf(hdrGamma))),
+            setHdrRollOff(Float.parseFloat(props.getProperty("hdrRollOff",
+                    props.getProperty("hdrGamma", String.valueOf(hdrRollOff)))),
                 false);
             setSdrBrightness(Float.parseFloat(props.getProperty("sdrBrightness",
                     String.valueOf(sdrBrightness))),
@@ -156,7 +158,7 @@ public class Options {
         props.setProperty("hdrEnabled", String.valueOf(hdrEnabled));
         props.setProperty("hdrMinLuminance", String.valueOf(hdrMinLuminance));
         props.setProperty("hdrMaxLuminance", String.valueOf(hdrMaxLuminance));
-        props.setProperty("hdrGamma", String.valueOf(hdrGamma));
+        props.setProperty("hdrRollOff", String.valueOf(hdrRollOff));
         props.setProperty("sdrBrightness", String.valueOf(sdrBrightness));
         props.setProperty("dlssMode", String.valueOf(dlssMode));
         props.setProperty("upscalerType", String.valueOf(upscalerType));
@@ -246,14 +248,20 @@ public class Options {
         }
     }
 
-    public native static void nativeSetHdrGamma(float hdrGamma, boolean write);
+    public native static void nativeSetHdrRollOff(float hdrRollOff, boolean write);
 
-    public static void setHdrGamma(float hdrGamma, boolean write) {
-        Options.hdrGamma = Math.max(hdrGamma, 0.001f);
-        nativeSetHdrGamma(Options.hdrGamma, write);
+    public static void setHdrRollOff(float hdrRollOff, boolean write) {
+        Options.hdrRollOff = Math.max(hdrRollOff, 0.001f);
+        nativeSetHdrRollOff(Options.hdrRollOff, write);
         if (write) {
             overwriteConfig();
         }
+    }
+
+    public native static boolean nativeIsHdrActive();
+
+    public static boolean isHdrToneMappingActive() {
+        return hdrEnabled && nativeIsHdrActive();
     }
 
     public native static void nativeSetSdrBrightness(float sdrBrightness, boolean write);
