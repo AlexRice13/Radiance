@@ -3,6 +3,7 @@ package com.radiance.client;
 import com.mojang.logging.LogUtils;
 import com.radiance.client.option.Options;
 import com.radiance.client.pipeline.Pipeline;
+import com.radiance.client.profiler.ProfilerOverlay;
 import com.radiance.client.proxy.vulkan.RendererProxy;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import org.slf4j.Logger;
 
@@ -88,6 +90,8 @@ public class RadianceClient implements ClientModInitializer {
         Options.readOptions();
 
         Pipeline.reloadAllModuleEntries();
+
+        ClientTickEvents.END_CLIENT_TICK.register(ProfilerOverlay::tick);
     }
 
     public void copyFileFromResource(Path targetPath, Path resourcePath) {

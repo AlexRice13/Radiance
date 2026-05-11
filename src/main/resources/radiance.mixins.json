@@ -46,6 +46,7 @@
     "vulkan_render_integration.EntityRendererMixins",
     "vulkan_render_integration.FluidRendererMixins",
     "vulkan_render_integration.GameRendererMixins",
+    "vulkan_render_integration.GameHudMixins",
     "vulkan_render_integration.GlUniformMixins",
     "vulkan_render_integration.GlStateManagerMixins",
     "vulkan_render_integration.GLXMixins",
